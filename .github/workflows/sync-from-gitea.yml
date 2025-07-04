@@ -2,20 +2,26 @@ name: Sync from Gitea
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # every 15 minutes
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone Gitea Repo with Token
+      - name: Checkout dummy (to unlock permissions)
+        uses: actions/checkout@v4
+
+      - name: Set up Git
         run: |
           git config --global user.name "GitHub Sync Bot"
           git config --global user.email "sync-bot@example.com"
 
+      - name: Clone Gitea Mirror Repo
+        run: |
           git clone --mirror https://${{ secrets.GITEA_USER }}:${{ secrets.GITEA_TOKEN }}@gitshop.cc/mahalo/Gitea.git gitea-mirror
           cd gitea-mirror
-
-          git remote set-url origin https://github.com/acidburnmonkey/Gitea.git
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/acidburnmonkey/Gitea.git
           git push --mirror
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
