@@ -1,0 +1,24 @@
+name: Sync from Gitea
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # every 15 minutes
+  workflow_dispatch:       # allow manual triggering
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up SSH access to Gitea
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GITEA_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan gitshop.cc >> ~/.ssh/known_hosts
+
+      - name: Clone from Gitea
+        run: |
+          git clone --mirror https://gitshop.cc/mahalo/Gitea.git gitea-mirror
+          cd gitea-mirror
+          git remote set-url origin https://github.com/acidburnmonkey/Gitea.git
+          git push --mirror
