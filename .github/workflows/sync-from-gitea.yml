@@ -8,20 +8,17 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to allow pushing to the repo
     steps:
-      - name: Checkout dummy (to unlock permissions)
-        uses: actions/checkout@v4
-
       - name: Set up Git
         run: |
           git config --global user.name "GitHub Sync Bot"
           git config --global user.email "sync-bot@example.com"
 
-      - name: Clone Gitea Mirror Repo
+      - name: Clone from Gitea and Push to GitHub
         run: |
           git clone --mirror https://${{ secrets.GITEA_USER }}:${{ secrets.GITEA_TOKEN }}@gitshop.cc/mahalo/Gitea.git gitea-mirror
           cd gitea-mirror
-          git remote set-url origin git@github.com:acidburnmonkey/Gitea.git
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/acidburnmonkey/Gitea.git
           git push --mirror
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
