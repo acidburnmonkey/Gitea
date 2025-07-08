@@ -1,20 +1,13 @@
-name: TruffleHog OSS
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-
+name: gitleaks
+on: [pull_request, push, workflow_dispatch]
 jobs:
-  test:
+  scan:
+    name: gitleaks
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Secret Scanning
-        uses: trufflesecurity/trufflehog@main
-        with:
-          extra_args: --results=verified,unknown
+      - uses: gitleaks/gitleaks-action@v1
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
